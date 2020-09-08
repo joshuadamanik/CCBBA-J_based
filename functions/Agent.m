@@ -50,7 +50,9 @@ classdef Agent < handle
                 end
             end
             
-            val = n_Dsat(1);
+            if ~isempty(n_Dsat)
+                val = n_Dsat(1);
+            end
             for n_D = 2:max_D
                 if n_Dsat(n_D) > 0
                     val = val + 1;
@@ -83,9 +85,6 @@ classdef Agent < handle
             deps = activity.deps();
             val = 1;
             for u = 1:size(deps, 2)
-                if u == q
-                    continue
-                end
                 j_u = activity.elements(u).id;
                 if ~( length(obj.yi) < j_u || ( length(obj.yi) >= j && obj.yi(j) > obj.yi(j_u) ) || ( deps(u, q) ~= -1 ) )
                     val = 0;
@@ -226,13 +225,13 @@ classdef Agent < handle
                     new_pi(j,:) = new_pij(n_max,:);
                     
                     new_ci(j) = new_cij(n_max);
-                    fprintf('Adding task %d to bundle, Raw: %.2f, ', avail_tasks(j), new_ci(j));
+%                     fprintf('Adding task %d to bundle, Raw: %.2f, ', avail_tasks(j), new_ci(j));
                     new_ci(j) = new_ci(j) * obj.canBid(avail_tasks(j), new_ci(j));
-                    fprintf('Score: %.2f, Path: ', new_ci(j));
+%                     fprintf('Score: %.2f, Path: ', new_ci(j));
                     
-                    path_str = join(sprintfc('%d ', new_pi(j,:)));
-                    fprintf(path_str{1});
-                    fprintf('\n');
+%                     path_str = join(sprintfc('%d ', new_pi(j,:)));
+%                     fprintf(path_str{1});
+%                     fprintf('\n');
                 end
 
                 [ci_max, j_max] = max(new_ci);
@@ -248,7 +247,7 @@ classdef Agent < handle
             end
             obj.zetai(obj.pi) = obj.calcTime();
             
-            obj.checkTimeout()
+            
         end
         
         function checkTimeout(obj)
@@ -288,7 +287,7 @@ classdef Agent < handle
             reward = 0;
             for j = 1:length(path)
                 if time < 1e+10
-                    reward = reward + exp(-0.01*time(j)) * tasks(path(j)).reward;
+                    reward = reward + exp(-0.001*time(j)) * tasks(path(j)).reward;
                 end
             end
             reward = reward - 10 * dist;
@@ -298,7 +297,7 @@ classdef Agent < handle
             global tasks
             SPEED = 1; % m/s
             DIST_PER_SQUARE = 1;
-            LOAD_TIME = 3;
+            LOAD_TIME = 0;
             
             if ~exist('path', 'var')
                 path = obj.pi;
@@ -317,7 +316,7 @@ classdef Agent < handle
                 last_time = last_time + dist / SPEED;
                 last_time = max(last_time, tMin);
                 
-                fprintf('[%.2f] ', last_time);
+%                 fprintf('[%.2f] ', last_time);
 %                 if last_time > tMax
 %                     last_time = 1e+10;
 %                 end
@@ -474,6 +473,7 @@ classdef Agent < handle
             end
             
 %             obj.buildBundle();
+            obj.checkTimeout();
         end
         
         function incrementW(obj, j)

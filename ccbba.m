@@ -1,7 +1,7 @@
 clc, close all, clear all
 addpath('functions');
 
-rng(1);
+% rng(1);
 
 global DEBUG_LEVEL
 DEBUG_LEVEL = 1;
@@ -14,7 +14,7 @@ TEMP_AFTER = 1;
 TEMP_BEFORE = 0;
 
 NUM_AGENTS = 5;                             % Number of agents
-NUM_TASKS = 7;                             % Number of tasks
+NUM_TASKS = 9;                             % Number of tasks
 NUM_ACTIVITIES = 1;
 
 MAX_TASKS_PER_AGENT = 10;
@@ -23,8 +23,14 @@ MAX_XY = 10;
 
 % ADJ_MAT = diag(ones(NUM_AGENTS-1, 1), -1) + diag(ones(NUM_AGENTS-1, 1), 1);
 ADJ_MAT = ones(NUM_AGENTS) - eye(NUM_AGENTS);
-TASKS_POS = [1 2 5 1;5 1 10 4;1 2 5 4;5 4 10 4;1 6 5 4;1 6 5 8;5 8 10 4;];
-TASKS_REWARD = [0, 100, 0, 200, 0, 0, 100];
+
+% 7 Transit Problem
+% TASKS_POS = [1 2 5 1;5 1 10 4;1 2 5 4;5 4 10 4;1 6 5 4;1 6 5 8;5 8 10 4;];
+% TASKS_REWARD = [50, 50, 50, 100, 50, 50, 50];
+
+% 9 Transit Problem
+TASKS_POS = [4 4 7 0;7 0 10 4;4 4 6 5;8 5 10 4;6 5 8 5;4 6 6 5;8 5 10 6;4 6 7 10;7 10 10 6];
+TASKS_REWARD = [50; 50; 100/3; 100/3; 200/3; 100/3; 100/3; 50; 50];
 
 %% Agents and Tasks Initialization
 
@@ -52,25 +58,48 @@ for j = 1:NUM_TASKS
     tasks(j).k = randi(NUM_ACTIVITIES);
 end
 
-activities(1).dep  = [0  1 -1 -1  0  0  0;
-                      1  0 -1 -1  0  0  0;
-                     -1 -1  0  2  0  0  0;
-                     -1 -1  1  0  1 -1 -1;
-                      0  0  0  2  0 -1 -1;
-                      0  0  0 -1 -1  0  1;
-                      0  0  0 -1 -1  1  0];
-activities(1).temp = [0  0  1  1  1  1  1;
-                      1  0  1  1  1  1  1;
-                      1  1  0  0  1  1  1;
-                      1  1  1  0  1  1  1;
-                      1  1  1  0  0  1  1;
-                      1  1  1  1  1  0  0;
-                      1  1  1  1  1  1  0] * 1e+10;
-                  
+%% 7 Transit Problem
+
+% activities(1).dep  = [0  1 -1 -1  0  0  0;
+%                       1  0 -1 -1  0  0  0;
+%                      -1 -1  0  2  0  0  0;
+%                      -1 -1  1  0  1 -1 -1;
+%                       0  0  0  2  0 -1 -1;
+%                       0  0  0 -1 -1  0  1;
+%                       0  0  0 -1 -1  1  0];
+% activities(1).temp = [0  0  1  1  1  1  1;
+%                       1  0  1  1  1  1  1;
+%                       1  1  0  0  1  1  1;
+%                       1  1  1  0  1  1  1;
+%                       1  1  1  0  0  1  1;
+%                       1  1  1  1  1  0  0;
+%                       1  1  1  1  1  1  0] * 1e+10;
+%                   
+% activities(1).temp(1, 2) = -1-norm(tasks(2).pos - tasks(2).target);
+% activities(1).temp(3, 4) = -1-norm(tasks(4).pos - tasks(4).target);
+% activities(1).temp(5, 4) = -1-norm(tasks(4).pos - tasks(4).target);
+% activities(1).temp(6, 7) = -1-norm(tasks(7).pos - tasks(7).target);
+
+%% 9 Transit Problem
+
+activities(1).dep  = [0  1 -1 -1 -1  0  0  0  0;
+                      1  0 -1 -1 -1  0  0  0  0;
+                     -1 -1  0  1  2  0  0  0  0;
+                     -1 -1  1  0  2  0  0  0  0;
+                     -1 -1  1  1  0  1  1 -1 -1;
+                      0  0  0  0  2  0  1 -1 -1;
+                      0  0  0  0  2  1  0 -1 -1;
+                      0  0  0  0 -1 -1 -1  0  1;
+                      0  0  0  0 -1 -1 -1  1  0];
+activities(1).temp = (ones(9) - eye(9)) * 1e+10;
 activities(1).temp(1, 2) = -1-norm(tasks(2).pos - tasks(2).target);
-activities(1).temp(3, 4) = -1-norm(tasks(4).pos - tasks(4).target);
+activities(1).temp(3, 5) = -1-norm(tasks(5).pos - tasks(5).target);
 activities(1).temp(5, 4) = -1-norm(tasks(4).pos - tasks(4).target);
-activities(1).temp(6, 7) = -1-norm(tasks(7).pos - tasks(7).target);
+activities(1).temp(6, 5) = -1-norm(tasks(5).pos - tasks(5).target);
+activities(1).temp(5, 7) = -1-norm(tasks(7).pos - tasks(7).target);
+activities(1).temp(8, 9) = -1-norm(tasks(9).pos - tasks(9).target);
+
+%% Example Problem
 
 % tasks(1).dep = [2, 7, 8, 9, 11; DEP_AND, DEP_EXC, DEP_EXC, DEP_EXC, DEP_EXC];
 % tasks(2).dep = [1, 7, 8, 9, 11; DEP_AND, DEP_EXC, DEP_EXC, DEP_EXC, DEP_EXC];
@@ -98,6 +127,8 @@ activities(1).temp(6, 7) = -1-norm(tasks(7).pos - tasks(7).target);
 % tasks(1).temp = [2; TEMP_AFTER; 0];
 % tasks(11).dep = [9; DEP_AND];
 % tasks(11).temp = [9; TEMP_AFTER; 0];
+
+%%
 
 fprintf('\tAgents Position:\n');
 disp([agents.pos]);

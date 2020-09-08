@@ -8,6 +8,7 @@ classdef Task
         target
         reward
         k
+        delivery
         dep
         temp
         timeStart
